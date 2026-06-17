@@ -834,15 +834,15 @@ export default function App() {
     }
   }
 
-  // Check for saved game state
-  const savedGame = loadSavedGame();
+  // Always start a fresh game on page load — ignore any saved state.
+  const savedGame = null;
 
-  const [showIntro, setShowIntro] = useState(!savedGame);
+  const [showIntro, setShowIntro] = useState(true);
   const [gamePhase, setGamePhase] = useState<GamePhase>("findingOdds");
-  const [livesRemaining, setLivesRemaining] = useState(savedGame?.livesRemaining || initialLives);
+  const [livesRemaining, setLivesRemaining] = useState(initialLives);
 
   // End-game screen state
-  const [showEndGame, setShowEndGame] = useState(!!savedGame);
+  const [showEndGame, setShowEndGame] = useState(false);
   const [showCompletionScreen, setShowCompletionScreen] = useState(false);
   const [stage2Mistakes, setStage2Mistakes] = useState(savedGame?.stage2Mistakes || 0);
 

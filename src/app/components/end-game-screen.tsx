@@ -409,56 +409,33 @@ export function EndGameScreen({
                 ))}
               </div>
 
-              {/* Results visual card — per-guess grid */}
+              {/* Results visual card — compact display with coloured squares */}
               <div className="bg-[#fcfcfc] relative rounded-[8px]">
                 <div
                   aria-hidden="true"
                   className="absolute border border-[#5665ff] border-solid inset-0 pointer-events-none rounded-[8px] shadow-[0px_2px_0px_0px_#5665ff]"
                 />
                 <div className="flex flex-col items-start p-[16px]">
-                  {/* Phase 1: each guess = one row of 4 emojis */}
-                  {(() => {
-                    const rows: React.ReactNode[] = [];
-
-                    // Add all actual guesses
-                    guessLog.forEach((entry, i) => {
-                      const colorEmoji = GROUP_SQUARES[entry.groupIdx] || "🟧";
-                      const tilesInGroup = 4;
-
-                      if (entry.wasCorrect) {
-                        // Correct guess: colored colored colored + space + black
-                        rows.push(
-                          <motion.div
-                            key={`p1-${i}`}
-                            initial={{ opacity: 0, x: -6 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + i * 0.06, duration: 0.25 }}
-                            className="flex items-center text-[24px] leading-none"
-                          >
-                            <span>{colorEmoji}{colorEmoji}{colorEmoji}⬛</span>
-                          </motion.div>
-                        );
-                      } else {
-                        // Wrong guess: white squares for mistake count, then colored for remainder
-                        const mistakeCount = entry.wrongCountBefore + 1;
-                        const coloredCount = tilesInGroup - mistakeCount;
-
-                        rows.push(
-                          <motion.div
-                            key={`p1-${i}`}
-                            initial={{ opacity: 0, x: -6 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + i * 0.06, duration: 0.25 }}
-                            className="flex items-center text-[24px] leading-none"
-                          >
-                            <span>{"⬜".repeat(mistakeCount)}{colorEmoji.repeat(coloredCount)}</span>
-                          </motion.div>
-                        );
-                      }
-                    });
-
-                    return rows;
-                  })()}
+                  {/* Phase 1: each guess = row emoji + ✅/❌ */}
+                  {guessLog.map((entry, i) => {
+                    const colorEmoji = GROUP_SQUARES[entry.groupIdx] || "🟧";
+                    return (
+                      <motion.div
+                        key={`p1-${i}`}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + i * 0.06, duration: 0.25 }}
+                        className="flex items-center gap-[8px]"
+                      >
+                        <span className="text-[24px] leading-none">
+                          {colorEmoji}{colorEmoji}{colorEmoji}
+                        </span>
+                        <span className="text-[24px] leading-none">
+                          {entry.wasCorrect ? "✅" : "❌"}
+                        </span>
+                      </motion.div>
+                    );
+                  })}
 
                   {/* Phase 2: relink attempts — only if user reached Stage 2 */}
                   {!lostDuringFinding && relinkAttempts.length > 0 && (
@@ -472,18 +449,19 @@ export function EndGameScreen({
                         ➖➖➖➖
                       </motion.div>
                       {relinkAttempts.map((correctCount, i) => {
-                        const wrongCount = relinkAnswerLength - correctCount;
-                        const blacks = "⬛".repeat(correctCount);
-                        const whites = "⬜".repeat(wrongCount);
+                        const isCorrect = correctCount === relinkAnswerLength;
                         return (
                           <motion.div
                             key={`p2-${i}`}
                             initial={{ opacity: 0, x: -6 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 + (guessLog.length + i) * 0.06, duration: 0.25 }}
-                            className="flex items-center text-[24px] leading-none"
+                            className="flex items-center gap-[8px]"
                           >
-                            <span>{blacks}{whites}</span>
+                            <span className="text-[24px] leading-none">⬛</span>
+                            <span className="text-[24px] leading-none">
+                              {isCorrect ? "✅" : "❌"}
+                            </span>
                           </motion.div>
                         );
                       })}
