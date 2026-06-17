@@ -843,7 +843,6 @@ export default function App() {
 
   // End-game screen state
   const [showEndGame, setShowEndGame] = useState(false);
-  const [showCompletionScreen, setShowCompletionScreen] = useState(false);
   const [stage2Mistakes, setStage2Mistakes] = useState(savedGame?.stage2Mistakes || 0);
 
   // ─── Hint mode ───
@@ -1102,7 +1101,6 @@ export default function App() {
       setFailPhase(4);
       setFinalResult("failed");
       setShowEndGame(true);
-      setShowCompletionScreen(true);
     }, t);
   }, []);
 
@@ -1233,7 +1231,6 @@ export default function App() {
       setTimeout(() => setRecapPhase(4), 1600);
       setTimeout(() => {
         setShowEndGame(true);
-        setShowCompletionScreen(true);
       }, 4500);
     } else {
       setRelinkAttempts((prev) => [...prev, correctCount]);
@@ -1877,28 +1874,7 @@ export default function App() {
           />
         )}
       </AnimatePresence>
-      {/* Completion interstitial — shown on top of end-game screen */}
-      <AnimatePresence>
-        {showCompletionScreen && (
-          <motion.div
-            key="completion-interstitial"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
-            className="fixed inset-0 bg-[#fcfcfc] flex flex-col items-center justify-center z-[60] px-[32px]"
-          >
-            <div className="flex flex-col items-center gap-[24px] max-w-[400px] text-center">
-              <p className="font-['Literata',serif] font-bold text-[#191919] text-[28px]">
-                Well done!
-              </p>
-              <p className="text-[#333] text-[16px] leading-[24px]">
-                You've completed the game. Go back to the test and continue to the next question where you will have to review the results page.
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }
