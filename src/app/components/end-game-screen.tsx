@@ -37,6 +37,8 @@ interface EndGameScreenProps {
   relinkAnswerLength: number;
   /** True when the puzzle was solved without ever opening a hint. */
   cleanSolve?: boolean;
+  /** Number of hints opened during the game. */
+  hintsUsed?: number;
   onClose: () => void;
 }
 
@@ -229,6 +231,7 @@ export function EndGameScreen({
   guessLog,
   relinkAttempts,
   relinkAnswerLength,
+  hintsUsed = 0,
   onClose,
 }: EndGameScreenProps) {
   const [shareLabel, setShareLabel] = useState("Share");
@@ -380,8 +383,31 @@ export function EndGameScreen({
             <div className="flex flex-col gap-[16px] items-center p-[32px]">
               {/* RESULTS label */}
               <p className="font-semibold text-[#333] text-[16px] text-center">
-                RESULTS — Mistakes {totalMistakes}/{totalLives}
+                RESULTS
               </p>
+
+              {/* Stat chips — mistakes + hints */}
+              <div className="flex gap-[12px] w-full">
+                {[
+                  { value: totalMistakes, label: totalMistakes === 1 ? "Mistake" : "Mistakes" },
+                  { value: hintsUsed, label: hintsUsed === 1 ? "Hint used" : "Hints used" },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-[#fcfcfc] relative rounded-[8px] flex-1">
+                    <div
+                      aria-hidden="true"
+                      className="absolute border border-[#5665ff] border-solid inset-0 pointer-events-none rounded-[8px] shadow-[0px_2px_0px_0px_#5665ff]"
+                    />
+                    <div className="flex flex-col items-center justify-center px-[8px] py-[14px]">
+                      <p className="font-['Literata',serif] font-bold text-[#343d99] text-[30px] leading-none">
+                        {stat.value}
+                      </p>
+                      <p className="font-semibold text-[#666] text-[13px] text-center mt-[6px] whitespace-nowrap">
+                        {stat.label}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               {/* Results visual card — per-guess grid */}
               <div className="bg-[#fcfcfc] relative rounded-[8px]">

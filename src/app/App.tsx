@@ -656,6 +656,8 @@ interface SavedGameState {
   relinkAttempts: number[];
   /** True when the puzzle was solved without ever opening a hint. */
   cleanSolve?: boolean;
+  /** Number of hints opened during the game. */
+  hintsUsed?: number;
 }
 
 function loadSavedGame(): SavedGameState | null {
@@ -786,6 +788,7 @@ export default function App() {
         <div className="w-full h-dvh bg-[#fcfcfc] flex flex-col items-center font-sans">
           <EndGameScreen
             cleanSolve={savedGame.cleanSolve}
+            hintsUsed={savedGame.hintsUsed}
             guessHistory={savedGame.guessHistory}
             stage1Mistakes={savedGame.stage1Mistakes}
             stage2Mistakes={savedGame.stage2Mistakes}
@@ -851,6 +854,7 @@ export default function App() {
   // Hints that have been opened at least once (icon stays lit; drives clean-solve).
   const [revealedHints, setRevealedHints] = useState<number[]>([]);
   const cleanSolve = revealedHints.length === 0;
+  const hintsUsed = revealedHints.length;
 
   const toggleHintMode = useCallback(() => {
     setHintMode((prev) => {
@@ -1007,10 +1011,11 @@ export default function App() {
         guessLog,
         relinkAttempts,
         cleanSolve,
+        hintsUsed,
       };
       saveGame(gameState);
     }
-  }, [showEndGame, finalResult, savedGame, guessHistory, stage1Mistakes, stage2Mistakes, stage2TotalLives, livesRemaining, wrongGuesses, lostDuringFinding, guessLog, relinkAttempts, cleanSolve]);
+  }, [showEndGame, finalResult, savedGame, guessHistory, stage1Mistakes, stage2Mistakes, stage2TotalLives, livesRemaining, wrongGuesses, lostDuringFinding, guessLog, relinkAttempts, cleanSolve, hintsUsed]);
 
   // ─── Transition to Stage 2 ───
   const transitionToStage2 = useCallback((newLives: number, totalLives: number) => {
@@ -1110,6 +1115,8 @@ export default function App() {
       const wrongForRow = wrongGuesses[groupIndex] || [];
       if (wrongForRow.includes(word)) return;
 
+      // Interacting with the board closes any open hint bubble.
+      setOpenHint(null);
       setCurrentSelection((prev) => {
         if (prev && prev.word === word && prev.groupIdx === groupIndex) return null;
         return { word, groupIdx: groupIndex };
@@ -1178,6 +1185,8 @@ export default function App() {
   const handleRelinkWordTap = useCallback(
     (word: string, groupIdx: number) => {
       if (finalResult) return;
+      // Interacting with the board closes any open hint bubble.
+      setOpenHint(null);
       setSelectedRelinkWords((prev) => {
         const existing = prev.findIndex((w) => w.word === word && w.groupIdx === groupIdx);
         if (existing >= 0) return prev.filter((_, i) => i !== existing);
@@ -1309,6 +1318,8 @@ export default function App() {
   const HINT_ROW_NAMES = ["purple", "blue", "green", "orange"];
   const renderRowHint = (groupIdx: number, radius = 12) => {
     if (!hintMode) return null;
+    // Once a row is answered (solved), its hint goes away.
+    if (solvedRows.includes(groupIdx)) return null;
     const colors = GROUP_COLORS[groupIdx];
     return (
       <RowHintFrame
@@ -1861,6 +1872,7 @@ export default function App() {
             relinkAttempts={relinkAttempts}
             relinkAnswerLength={RELINK_ANSWER.length}
             cleanSolve={cleanSolve}
+            hintsUsed={hintsUsed}
             onClose={() => setShowEndGame(false)}
           />
         )}
